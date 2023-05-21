@@ -70,7 +70,7 @@ class Metronome:
                 "beats": 12,
                 "tempo_x": 1,
                 "subbeats": 2,
-                "sounds": "0.0.x.0.0.x.0.x.0.x.0.x.",
+                "sounds": "011.x.011.x.1.x.11x.1.x.",
                 "leds": [
                     "010000000000",
                     "001000000000",
@@ -133,7 +133,7 @@ class Metronome:
         elif sound == "0":
             simpleio.tone(hardware.PWM, 1200, self.BEEP_DURATION)
         elif sound == "1":
-            simpleio.tone(hardware.PWM, 500, self.BEEP_DURATION)
+            simpleio.tone(hardware.PWM, 400, self.BEEP_DURATION)
 
     def enter(self):
         hardware.display.show(self.screen)
