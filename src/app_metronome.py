@@ -1,5 +1,4 @@
-import time
-import simpleio
+from adafruit_ticks import ticks_ms, ticks_diff
 import neopixel
 import displayio
 import terminalio
@@ -186,7 +185,7 @@ class Metronome:
         self._set_tempo(60)
         self.time_signature = self.beat_patterns[self.curr_pattern]["beats"]
         self.BEEP_DURATION = 0.05
-        self.t0 = time.monotonic()
+        self.t0 = ticks_ms()
         self.step = 0
         self.beat = 0
 
@@ -272,8 +271,8 @@ class Metronome:
 
     def loop_handler(self):
         # check time
-        if time.monotonic() - self.t0 >= self.delay / self.beat_patterns[self.curr_pattern]["subbeats"]:
-            self.t0 = time.monotonic()  # reset time before click to maintain accuracy
+        if ticks_diff(ticks_ms(), self.t0) >= 1000 * self.delay / self.beat_patterns[self.curr_pattern]["subbeats"]:
+            self.t0 = ticks_ms()  # reset time before click to maintain accuracy
             #print(self.step, self.beat, self._is_on_beat())
             self.play()
 
