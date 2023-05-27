@@ -226,11 +226,6 @@ class Metronome:
 
 
     def play(self):  # Play metronome sound and flash display
-        # update display and leds if on beat
-        if self._is_on_beat():
-            self.update_display()
-            self.update_leds()
-
         # only the first sound array for now
         rhythm = self.beat_patterns[self.curr_pattern]["sounds"]
         sound = rhythm[self.step]
@@ -240,6 +235,11 @@ class Metronome:
         elif sound == "0":
             self.curr_voice = (self.curr_voice + 1) % self.num_voices
             self.mixer.voice[self.curr_voice].play(self.sample_0, loop=False)
+
+                # update display and leds if on beat
+        if self._is_on_beat():
+            self.update_display()
+            self.update_leds()
 
     def enter(self):
         hardware.display.show(self.screen)
