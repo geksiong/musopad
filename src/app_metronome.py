@@ -4,6 +4,9 @@ import neopixel
 import displayio
 import terminalio
 from adafruit_display_text import label
+import audiocore
+import audiobusio
+import audiomixer
 
 import hardware
 
@@ -70,7 +73,28 @@ class Metronome:
                 "beats": 12,
                 "tempo_x": 1,
                 "subbeats": 2,
-                "sounds": "011.x.011.x.1.x.11x.1.x.",
+                "sounds": "-00-x--00-x-0-x-00x-0-x-",
+                "leds": [
+                    "010000000000",
+                    "001000000000",
+                    "000200000000",
+                    "000010000000",
+                    "000001000000",
+                    "000000200000",
+                    "000000010000",
+                    "000000002000",
+                    "000000000100",
+                    "000000000020",
+                    "000000000001",
+                    "200000000000"
+                ],
+            },
+            {
+                "name": "Alegria",
+                "beats": 12,
+                "tempo_x": 1,
+                "subbeats": 2,
+                "sounds": "-00-x--00-x--0x--0x--0x-",
                 "leds": [
                     "010000000000",
                     "001000000000",
@@ -85,7 +109,77 @@ class Metronome:
                     "000000000001",
                     "200000000000"
                 ]
+            },
+            {
+                "name": "Buleria",
+                "beats": 12,
+                "tempo_x": 1,
+                "subbeats": 2,
+                "sounds": "000-x-000-x-00x-00x-0-x-",
+                "leds": [
+                    "010000000000",
+                    "001000000000",
+                    "000200000000",
+                    "000010000000",
+                    "000001000000",
+                    "000000200000",
+                    "000000010000",
+                    "000000002000",
+                    "000000000100",
+                    "000000000020",
+                    "000000000001",
+                    "200000000000"
+                ]
+            },
+            {
+                "name": "Siguiriyas",
+                "beats": 12,
+                "tempo_x": 1,
+                "subbeats": 2,
+                "sounds": "x--0x--0x--00-x-0-0-x-0-",
+                "leds": [
+                    "000000002000",
+                    "000000000100",
+                    "000000000020",
+                    "000000000001",
+                    "200000000000",
+                    "010000000000",
+                    "001000000000",
+                    "000200000000",
+                    "000010000000",
+                    "000001000000",
+                    "000000200000",
+                    "000000010000"
+                ]
+            },
+            {
+                "name": "Tangos",
+                "beats": 4,
+                "tempo_x": 1,
+                "subbeats": 2,
+                "sounds": "--00x-0-",
+                "leds": [
+                    "222000000000",
+                    "000111000000",
+                    "000000222000",
+                    "000000000111"
+                ]
+            },
+            {
+                "name": "Rhumba",
+                "beats": 4,
+                "tempo_x": 1,
+                "subbeats": 2,
+                "sounds": "0-x-0-x-",
+                "leds": [
+                    "111000000000",
+                    "000222000000",
+                    "000000111000",
+                    "000000000222"
+                ]
             }
+
+
         ]
 
         self.curr_pattern = 0
@@ -118,6 +212,19 @@ class Metronome:
         self.screen.append(self.label_bpm)
         self.screen.append(self.label_beats)
 
+        # Speaker
+        self.speaker = audiobusio.I2SOut(hardware.SND_BCLK, hardware.SND_LRC, hardware.SND_DIN)
+        self.num_voices = 2
+        self.curr_voice = 0
+        # sufficient buffer_size needed to prevent glitches. too high and timing will be off.
+        self.mixer = audiomixer.Mixer(voice_count=self.num_voices, buffer_size=4096, sample_rate=22050,
+                        channel_count=1, bits_per_sample=16, samples_signed=True)
+        self.speaker.play(self.mixer)
+        self.mixer.voice[0].level = 1.0
+        self.mixer.voice[1].level = 1.0
+        self.sample_x = audiocore.WaveFile(open("files/Ping Hi.wav","rb"))
+        self.sample_0 = audiocore.WaveFile(open("files/Ping Low.wav","rb"))
+
 
     def play(self):  # Play metronome sound and flash display
         # update display and leds if on beat
@@ -129,11 +236,11 @@ class Metronome:
         rhythm = self.beat_patterns[self.curr_pattern]["sounds"]
         sound = rhythm[self.step]
         if sound == "x":  # Put emphasis on downbeat
-            simpleio.tone(hardware.PWM, 1800, self.BEEP_DURATION)
+            self.curr_voice = (self.curr_voice + 1) % self.num_voices
+            self.mixer.voice[self.curr_voice].play(self.sample_x, loop=False)
         elif sound == "0":
-            simpleio.tone(hardware.PWM, 1200, self.BEEP_DURATION)
-        elif sound == "1":
-            simpleio.tone(hardware.PWM, 400, self.BEEP_DURATION)
+            self.curr_voice = (self.curr_voice + 1) % self.num_voices
+            self.mixer.voice[self.curr_voice].play(self.sample_0, loop=False)
 
     def enter(self):
         hardware.display.show(self.screen)

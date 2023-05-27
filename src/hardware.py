@@ -17,7 +17,7 @@ JOY_X = board.A1
 JOY_Y = board.A0
 JOY_BTN = board.GP22
 
-BUTTON1 = board.GP14
+BUTTON1 = board.GP15
 
 # I2C IO Expander
 IO_ADDR = 0x20
@@ -47,7 +47,10 @@ KEYS_MAP = {
 
 # Audio
 MIC_IN = board.A2
-PWM = board.GP15
+
+SND_BCLK = board.GP12
+SND_LRC = board.GP13
+SND_DIN = board.GP14
 
 # LED
 LED_RING = board.GP16
