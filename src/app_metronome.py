@@ -213,17 +213,6 @@ class Metronome:
 
         # Speaker
         self.speaker = audiobusio.I2SOut(hardware.SND_BCLK, hardware.SND_LRC, hardware.SND_DIN)
-        self.num_voices = 2
-        self.curr_voice = 0
-        # sufficient buffer_size needed to prevent glitches. too high and timing will be off.
-        self.mixer = audiomixer.Mixer(voice_count=self.num_voices, buffer_size=4096, sample_rate=22050,
-                        channel_count=1, bits_per_sample=16, samples_signed=True)
-        self.speaker.play(self.mixer)
-        self.mixer.voice[0].level = 1.0
-        self.mixer.voice[1].level = 1.0
-        self.sample_x = audiocore.WaveFile(open("files/Ping Hi.wav","rb"))
-        self.sample_0 = audiocore.WaveFile(open("files/Ping Low.wav","rb"))
-
 
     def play(self):  # Play metronome sound and flash display
         # only the first sound array for now
@@ -244,11 +233,25 @@ class Metronome:
     def enter(self):
         hardware.display.show(self.screen)
 
+        # connect speaker to AudioMixer
+        self.num_voices = 2
+        self.curr_voice = 0
+        # sufficient buffer_size needed to prevent glitches. too high and timing will be off.
+        self.mixer = audiomixer.Mixer(voice_count=self.num_voices, buffer_size=4096, sample_rate=22050,
+                        channel_count=1, bits_per_sample=16, samples_signed=True)
+        self.speaker.play(self.mixer)
+        self.mixer.voice[0].level = 1.0
+        self.mixer.voice[1].level = 1.0
+        self.sample_x = audiocore.WaveFile(open("files/Ping Hi.wav","rb"))
+        self.sample_0 = audiocore.WaveFile(open("files/Ping Low.wav","rb"))
+
+
     def exit(self):
         # clear all LEDs
         for i in range(len(self.leds)):
             self.leds[i] = (0,0,0)
         self.leds.show()
+        self.speaker.stop()
 
     def update_leds(self):
         offset = 3
