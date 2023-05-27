@@ -211,8 +211,6 @@ class Metronome:
         self.screen.append(self.label_bpm)
         self.screen.append(self.label_beats)
 
-        # Speaker
-        self.speaker = audiobusio.I2SOut(hardware.SND_BCLK, hardware.SND_LRC, hardware.SND_DIN)
 
     def play(self):  # Play metronome sound and flash display
         # only the first sound array for now
@@ -233,6 +231,8 @@ class Metronome:
     def enter(self):
         hardware.display.show(self.screen)
 
+        # Speaker
+        self.speaker = audiobusio.I2SOut(hardware.SND_BCLK, hardware.SND_LRC, hardware.SND_DIN)
         # connect speaker to AudioMixer
         self.num_voices = 2
         self.curr_voice = 0
@@ -251,7 +251,7 @@ class Metronome:
         for i in range(len(self.leds)):
             self.leds[i] = (0,0,0)
         self.leds.show()
-        self.speaker.stop()
+        self.speaker.deinit()
 
     def update_leds(self):
         offset = 3
