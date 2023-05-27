@@ -30,14 +30,15 @@ class Tuner:
     def __init__(self, title):
         self.title = title
 
-        self.length = 1024
+        self.length = 512
         self.samples = array.array("H", [0x0000] * self.length)
-        self.rate = 22000
+        self.rate = 8000
 
         # Display
         self.rms = 0.00
         self.detected_note = "??"
         self.pitch_diff = 0.00
+        self.last_detected_time = 0
 
         self.label_note = label.Label(terminalio.FONT, scale=2, text=self.detected_note, color=0xFFFFFF, anchor_point=(0.5,0), x=8, y=16+10)
         self.label_pitch_diff = label.Label(terminalio.FONT, scale=1, text=str(self.pitch_diff), color=0xFFFFFF, anchor_point=(0.5,0), x=96, y=16+10)
@@ -67,21 +68,26 @@ class Tuner:
         hardware.mic_readinto(self.samples, self.rate)
 
         x = np.array([(x - 32767)/65536 for x in self.samples])
-        pitches, harmonic_rates, argmins, times = yin.compute_yin(sig=x, sr=self.rate, w_len=512, w_step=256, f0_min=50, f0_max=500, harmo_thresh=0.1)
-        print(pitches, harmonic_rates)
+        #start = time.monotonic()
+        pitches, harmonic_rates, argmins, times = yin.compute_yin(sig=x, sr=self.rate, w_len=256, w_step=256, f0_min=60, f0_max=900, harmo_thresh=0.4)
+        #end = time.monotonic()
+        #print("took ", end-start)
+        #print(pitches, harmonic_rates)
 
-        if pitches[0] != 0.0:
+        if time.monotonic() - self.last_detected_time > 3.0:
+            self.detected_note = "??"
+            self.pitch_diff = 0.00
+
+        if pitches[0] != 0.0 and harmonic_rates[0] > 0.2:
             matches = [abs(pitches[0] - x[1]) for x in NOTE_PITCHES]
             idx = matches.index(min(matches))
             self.pitch_diff = pitches[0] - NOTE_PITCHES[idx][1]
             self.detected_note = NOTE_PITCHES[idx][0]
+            self.last_detected_time = time.monotonic()
             print(self.detected_note, ":", NOTE_PITCHES[idx][1], pitches[0], self.pitch_diff)
-        else:
-            self.detected_note = "??"
-            self.pitch_diff = 0.00
 
         self.update_display()
-        time.sleep(0.1)
+        #time.sleep(0.1)
 
     def update_display(self):
         values = np.array(self.samples)
