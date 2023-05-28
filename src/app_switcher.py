@@ -5,6 +5,7 @@ import app_macropad
 import app_metronome
 import app_tuner
 import app_visualizer
+import app_synth
 
 import joystick
 
@@ -21,6 +22,7 @@ class ModeSwitcher:
         self.apps = [
             app_macropad.MacroPad("MUSO PAD"),
             app_metronome.Metronome("METRONOM-NOM"),
+            app_synth.Synthesizer("SYNTH"),
             app_tuner.Tuner("TUNER"),
             app_visualizer.Visualizer("VISUALIZER")
             ]
